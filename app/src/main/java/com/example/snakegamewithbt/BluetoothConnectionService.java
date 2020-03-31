@@ -22,9 +22,9 @@ import java.util.UUID;
  */
 
 public class BluetoothConnectionService {
-    private static final String TAG = "BTConnectionService";
+    private static final String TAG = "BluetoothConnectionServ";
 
-    private static final String appName = "SNAKE APP";
+    private static final String appName = "MYAPP";
 
     private static final UUID MY_UUID_INSECURE =
             UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -38,6 +38,7 @@ public class BluetoothConnectionService {
     private BluetoothDevice mmDevice;
     private UUID deviceUUID;
     ProgressDialog mProgressDialog;
+
     private ConnectedThread mConnectedThread;
 
     public BluetoothConnectionService(Context context) {
@@ -90,6 +91,7 @@ public class BluetoothConnectionService {
                 Log.e(TAG, "AcceptThread: IOException: " + e.getMessage() );
             }
 
+            //talk about this is in the 3rd
             if(socket != null){
                 connected(socket,mmDevice);
             }
@@ -269,6 +271,7 @@ public class BluetoothConnectionService {
             }
         }
 
+
         //Call this from the main activity to send data to the remote device
         public void write(byte[] bytes) {
             String text = new String(bytes, Charset.defaultCharset());
@@ -313,3 +316,8 @@ public class BluetoothConnectionService {
     }
 
 }
+
+
+
+
+

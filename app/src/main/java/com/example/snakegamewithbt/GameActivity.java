@@ -1,7 +1,9 @@
 package com.example.snakegamewithbt;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -19,11 +21,16 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.IOException;
 import java.util.Random;
+import java.util.UUID;
 
 public class GameActivity extends Activity {
+    private static final String TAG = "GameActivity";
 
     Canvas canvas;
     SnakeView snakeView;
@@ -68,6 +75,18 @@ public class GameActivity extends Activity {
     int numBlocksWide;
     int numBlocksHigh;
 
+    //-----BLUETOOTH COMPONENTS-----
+
+    BluetoothConnectionService mBluetoothConnection;
+
+    //UUID
+    private static final UUID MY_UUID_INSECURE =
+            UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+    //VARIABLE RECEIVED FROM ARDUINO
+    StringBuilder direction;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,7 +96,28 @@ public class GameActivity extends Activity {
         snakeView = new SnakeView(this);
         setContentView(snakeView);
 
+        //GETTING DATA FROM ARDUINO
+        direction = new StringBuilder();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter("incomingMessage"));
+
     }
+
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String text = intent.getStringExtra("theMessage");
+            //byte[] data = intent.getByteExtra("theMessage");
+            direction.append(text + "\n");
+
+            Toast.makeText(GameActivity.this, direction, Toast.LENGTH_SHORT).show();
+
+            //For some reason its not log-ing any more -.-
+            Log.d(TAG, "Received direction from arduino: " + direction);
+
+            direction.setLength(0);
+
+        }
+    };
 
     class SnakeView extends SurfaceView implements Runnable {
         Thread ourThread = null;
