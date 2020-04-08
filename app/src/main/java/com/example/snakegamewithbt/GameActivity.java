@@ -105,7 +105,6 @@ public class GameActivity extends Activity {
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            int num = 0;
             String text = intent.getStringExtra("theMessage");
             //byte[] data = intent.getByteExtra("theMessage");
             direction.append(text + "\n");
@@ -114,45 +113,11 @@ public class GameActivity extends Activity {
 
             //For some reason its not log-ing any more -.-
             Log.d(TAG, "Received direction from arduino: " + direction);
-            String[] temp = direction.toString().split("\\s");
-
-            try
-            {
-                num = Integer.parseInt(temp[0]);
-                ControlInput(num);
-            }
-            catch(NumberFormatException e)
-            {
-                Toast.makeText(GameActivity.this, "Could not parse " + e, Toast.LENGTH_SHORT).show();
-            }
-
 
             direction.setLength(0);
-        }
 
-       // private void ControlInput() {
-       // }
+        }
     };
-
-    private void ControlInput(int i)
-    {
-        if(i == 3)
-        {
-            directionOfTravel++;
-            if(directionOfTravel == 4)
-            {
-                directionOfTravel = 0;
-            }
-        }
-        else if(i == 1)
-        {
-            directionOfTravel--;
-            if(directionOfTravel == -1)
-            {
-                directionOfTravel = 3;
-            }
-        }
-    }
 
     class SnakeView extends SurfaceView implements Runnable {
         Thread ourThread = null;
@@ -341,6 +306,7 @@ public class GameActivity extends Activity {
             ourThread.start();
         }
 
+        //Needs editing to support arduino controller
         @Override
         public boolean onTouchEvent(MotionEvent motionEvent) {
 
@@ -446,7 +412,7 @@ public class GameActivity extends Activity {
         Point size = new Point();
         display.getSize(size);
         screenWidth = size.x;
-        screenHeight = size.y-50;
+        screenHeight = size.y;
         topGap = screenHeight / 14;
 
         //Determine the size of each block/place on the game board
