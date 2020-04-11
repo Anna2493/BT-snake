@@ -12,34 +12,83 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="SNAKE!"
-        android:textSize="40dp"
-        android:padding="10dp"/>
+        android:textSize="30dp"
+        android:padding="5dp"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="25dp"
-        android:text="CONNECT"
-        android:padding="10dp"
+        android:textSize="10dp"
+        android:text="Bluetooth on"
+        android:padding="5dp"
         android:layout_marginTop="10dp"
+        android:id="@+id/btnBTOn"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10dp"
+        android:text="Find devices"
+        android:padding="5dp"
+        android:layout_marginTop="5dp"
+        android:id="@+id/btnFindDevices"/>
+
+    <ListView
+        android:layout_width="150dp"
+        android:layout_height="100dp"
+        android:layout_below="@+id/btnFindDevices"
+        android:id="@+id/lvDevices"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"/>
+
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:textSize="15dp"-->
+<!--        android:text="Connect"-->
+<!--        android:padding="10dp"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:id="@+id/btnConnect"/>-->
+
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:textSize="30dp"-->
+<!--        android:text="PLAY!"-->
+<!--        android:padding="10dp"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:id="@+id/btnPlay"/>-->
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10dp"
+        android:text="CONNECT"
+        android:padding="5dp"
+        android:layout_marginTop="5dp"
         android:id="@+id/btnConnect"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10dp"
+        android:text="PLAY!"
+        android:padding="5dp"
+        android:layout_marginTop="5dp"
+        android:id="@+id/btnPlay"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No connection"
-        android:padding="10dp"
-        android:layout_marginTop="10dp"
-        android:textSize="20dp"
-        android:id="@+id/tvStatus"/>
+        android:id="@+id/tvScore"
+        android:textSize="20dp"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="25dp"
-        android:text="PLAY!"
-        android:padding="10dp"
-        android:layout_marginTop="10dp"
-        android:id="@+id/btnPlay"/>
+        android:textSize="10dp"
+        android:text="SEND"
+        android:padding="5dp"
+        android:layout_marginTop="5dp"
+        android:id="@+id/btnSend"/>
 
 </LinearLayout>

@@ -1,5 +1,8 @@
 package com.example.snakegamewithbt;
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +29,8 @@ import android.widget.Toast;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.UUID;
 
@@ -80,11 +85,12 @@ public class GameActivity extends Activity {
     BluetoothConnectionService mBluetoothConnection;
 
     //UUID
-    private static final UUID MY_UUID_INSECURE =
+    static final UUID MY_UUID_INSECURE =
             UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     //VARIABLE RECEIVED FROM ARDUINO
     StringBuilder direction;
+
 
 
     @Override
@@ -128,8 +134,25 @@ public class GameActivity extends Activity {
 
             direction.setLength(0);
 
+            // SEND SCORE TO ARDUINO
+
+
         }
     };
+
+    public void sendScore(){
+
+        //Break BT connection
+//        String scoreString = Integer.toString(score);
+//        byte[] bytes = scoreString.getBytes(Charset.defaultCharset());
+//        mBluetoothConnection.write(bytes);
+
+        Intent goBack = new Intent (GameActivity.this, MainActivity.class);
+        String scoreString = Integer.toString(score);
+        goBack.putExtra("SCORE", scoreString);
+        startActivity(goBack);
+
+    }
 
     private void ControlInput(int i)
     {
@@ -216,6 +239,10 @@ public class GameActivity extends Activity {
                 //add to the score
                 score = score + snakeLength;
                 soundPool.play(sample1, 1, 1, 0, 0, 1);
+                Log.d(TAG, "Score: " + score);
+                //sendScore();
+
+
             }
 
             //move the body - starting at the back
@@ -260,9 +287,16 @@ public class GameActivity extends Activity {
 
             if (dead) {
                 //start again
-                soundPool.play(sample4, 1, 1, 0, 0, 1);
-                score = 0;
-                getSnake();
+//                soundPool.play(sample4, 1, 1, 0, 0, 1);
+//                score = 0;
+//                getSnake();
+
+                //Go to main activity and send the high score to arduino
+                //if dead close socket
+                sendScore();
+               // Intent goBack = new Intent (GameActivity.this, MainActivity.class);
+               // startActivity(goBack);
+
 
             }
 
