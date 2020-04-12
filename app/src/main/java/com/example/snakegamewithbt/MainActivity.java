@@ -311,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             isConnected = true;
         }
 
-        startGame();
+       // startGame();
     }
 
     /*
