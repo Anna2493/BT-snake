@@ -307,7 +307,7 @@ public class GameActivity extends Activity {
             if (ourHolder.getSurface().isValid()) {
                 canvas = ourHolder.lockCanvas();
                 //Paint paint = new Paint();
-                canvas.drawColor(Color.BLACK);//the background
+                canvas.drawColor(Color.WHITE);//the background
                 paint.setColor(Color.argb(255, 255, 255, 255));
                 paint.setTextSize(topGap / 2);
                 canvas.drawText("Score:" + score + "  Hi:" + hi+" Dir: "+directionOfTravel, 10, topGap - 6, paint);
@@ -490,10 +490,10 @@ public class GameActivity extends Activity {
         numBlocksHigh = ((screenHeight - topGap)) / blockSize;
 
         //Load and scale bitmaps
-        headBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.head);
-        bodyBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.body);
-        tailBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tail);
-        appleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.apple);
+        headBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.head2);
+        bodyBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.body2);
+        tailBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tail2);
+        appleBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.apple2);
 
         //scale the bitmaps to match the block size
         headBitmap = Bitmap.createScaledBitmap(headBitmap, blockSize, blockSize, false);

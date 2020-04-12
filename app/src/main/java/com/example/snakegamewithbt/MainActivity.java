@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Bundle b = getScore.getExtras();
         if (b != null) {
             score = (String) b.get("SCORE");
-            tvScore.setText(score);
+            tvScore.setText("You scored: " + score);
         }
 
 

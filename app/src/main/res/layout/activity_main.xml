@@ -8,79 +8,99 @@
     android:orientation="vertical"
     android:gravity="center">
 
-    <TextView
+    <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SNAKE!"
-        android:textSize="30dp"
-        android:padding="5dp"/>
+        android:src="@drawable/title">
+    </ImageView>
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="10dp"
-        android:text="Bluetooth on"
-        android:padding="5dp"
-        android:layout_marginTop="10dp"
-        android:id="@+id/btnBTOn"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="10dp"
-        android:text="Find devices"
-        android:padding="5dp"
-        android:layout_marginTop="5dp"
-        android:id="@+id/btnFindDevices"/>
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10dp"
+            android:text="Bluetooth on"
+            android:padding="5dp"
+            android:layout_marginTop="5dp"
+            android:id="@+id/btnBTOn"
+            android:background="@drawable/rounded_btn"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="2dp"
+            android:textColor="@color/white"
+            android:textStyle="bold"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10dp"
+            android:text="Find devices"
+            android:padding="5dp"
+            android:layout_marginTop="5dp"
+            android:id="@+id/btnFindDevices"
+            android:background="@drawable/rounded_btn"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="2dp"
+            android:textColor="@color/white"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+
 
     <ListView
         android:layout_width="150dp"
-        android:layout_height="100dp"
+        android:layout_height="150dp"
         android:layout_below="@+id/btnFindDevices"
         android:id="@+id/lvDevices"
         android:layout_marginTop="10dp"
         android:padding="10dp"/>
 
-<!--    <Button-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:textSize="15dp"-->
-<!--        android:text="Connect"-->
-<!--        android:padding="10dp"-->
-<!--        android:layout_marginTop="10dp"-->
-<!--        android:id="@+id/btnConnect"/>-->
-
-<!--    <Button-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:textSize="30dp"-->
-<!--        android:text="PLAY!"-->
-<!--        android:padding="10dp"-->
-<!--        android:layout_marginTop="10dp"-->
-<!--        android:id="@+id/btnPlay"/>-->
-
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="10dp"
-        android:text="CONNECT"
-        android:padding="5dp"
-        android:layout_marginTop="5dp"
-        android:id="@+id/btnConnect"/>
+        android:orientation="horizontal"
+        android:gravity="center">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="10dp"
-        android:text="PLAY!"
-        android:padding="5dp"
-        android:layout_marginTop="5dp"
-        android:id="@+id/btnPlay"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10dp"
+                android:text="CONNECT"
+                android:padding="5dp"
+                android:layout_marginTop="5dp"
+                android:id="@+id/btnConnect"
+                android:background="@drawable/rounded_btn"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="2dp"
+                android:textColor="@color/white"
+                android:textStyle="bold"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10dp"
+                android:text="PLAY!"
+                android:padding="5dp"
+                android:layout_marginTop="5dp"
+                android:id="@+id/btnPlay"
+                android:background="@drawable/rounded_btn"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="2dp"
+                android:textColor="@color/white"
+                android:textStyle="bold"/>
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvScore"
-        android:textSize="20dp"/>
+        android:textSize="20dp"
+        android:layout_marginTop="5dp"/>
 
     <Button
         android:layout_width="wrap_content"
@@ -89,6 +109,11 @@
         android:text="SEND"
         android:padding="5dp"
         android:layout_marginTop="5dp"
-        android:id="@+id/btnSend"/>
+        android:id="@+id/btnSend"
+        android:background="@drawable/rounded_btn"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="2dp"
+        android:textColor="@color/white"
+        android:textStyle="bold"/>
 
 </LinearLayout>
