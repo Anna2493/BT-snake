@@ -229,18 +229,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-
         btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                if (isConnected == true) {
-                    Intent connect = new Intent(MainActivity.this, GameActivity.class);
-                    startActivity(connect);
-                } else {
-                    Toast.makeText(MainActivity.this, "You are not connected to the device", Toast.LENGTH_SHORT).show();
-                }
-
-                //connectBT();
+            public void onClick(View view) {
+                startGame();
 
             }
         });
@@ -248,9 +240,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //String scoreString = Integer.toString(score);
-                String test = "test";
-                byte[] bytes = test.getBytes(Charset.defaultCharset());
+                String scoreString = Integer.toString(Integer.parseInt(score));
+                //startConnection();
+                //String test = "test";
+                byte[] bytes = scoreString.getBytes(Charset.defaultCharset());
                 mBluetoothConnection.write(bytes);
             }
         });
@@ -306,12 +299,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //IF success then set connected to true
         //isConnected = true;
         //navigateBack();
-        if(mBTDevice.getName().equals("TEST")){
+        if(mBTDevice.getName().equals("TEST") || mBTDevice.getName().equals("footbot3")){
             System.out.println("Success");
             isConnected = true;
         }
 
-        startGame();
+        //startGame();
     }
 
     /*
