@@ -7,16 +7,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.media.AudioManager;
-import android.media.SoundPool;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -27,14 +23,19 @@ import android.view.SurfaceView;
 import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.UUID;
 
-public class GameActivity extends Activity {
+public class GameActivity extends Activity
+{
+    /*
+    *  The game software written here is not entirely original source code.
+    *  Original code was added and written by Anna Dawidowska and Joel Degner-Budd.
+    *  The game supports Bluetooth connection of external controller
+    *  and only works using external controller.
+    *  Much of the code was edited to support our project, though much of the original source code
+    *  remains intact from the previous author.
+    * */
     private static final String TAG = "GameActivity";
 
     Canvas canvas;
@@ -45,24 +46,16 @@ public class GameActivity extends Activity {
     Bitmap tailBitmap;
     Bitmap appleBitmap;
 
-    //Sound
-    //initialize sound variables
-    private SoundPool soundPool;
-    int sample1 = -1;
-    int sample2 = -1;
-    int sample3 = -1;
-    int sample4 = -1;
-
-    //for snake movement
-    int directionOfTravel = 0;
+    //Snake movement
     //0 = up, 1 = right, 2 = down, 3= left
+    int directionOfTravel = 0;
 
-
+    //Holds screen size values
     int screenWidth;
     int screenHeight;
     int topGap;
 
-    //stats
+    //Game statistics
     long lastFrameTime;
     int fps;
     int score;
@@ -77,8 +70,8 @@ public class GameActivity extends Activity {
 
     //The size in pixels of a place on the game board
     int blockSize;
-    int numBlocksWide;
-    int numBlocksHigh;
+    int numBlocksWidth;
+    int numBlocksHeight;
 
     //-----BLUETOOTH COMPONENTS-----
 
@@ -91,13 +84,11 @@ public class GameActivity extends Activity {
     //VARIABLE RECEIVED FROM ARDUINO
     StringBuilder direction;
 
-
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
-        loadSound();
         configureDisplay();
         snakeView = new SnakeView(this);
         setContentView(snakeView);
@@ -108,45 +99,36 @@ public class GameActivity extends Activity {
 
     }
 
-    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    //Written by Anna Dawidowska, Edited by Joel Degner-Budd
+    BroadcastReceiver mReceiver = new BroadcastReceiver()
+    {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            int num = 0;
+        public void onReceive(Context context, Intent intent)
+        {
+            int num = 0; //used to pass direction value
             String text = intent.getStringExtra("theMessage");
-            //byte[] data = intent.getByteExtra("theMessage");
-            direction.append(text + "\n");
+            direction.append(text + "\n"); //append direction to String
 
-            Toast.makeText(GameActivity.this, direction, Toast.LENGTH_SHORT).show();
-
-            //For some reason its not log-ing any more -.-
             Log.d(TAG, "Received direction from arduino: " + direction);
-            String[] temp = direction.toString().split("\\s");
+            String[] temp = direction.toString().split("\\s"); //remove whitespace from String
 
             try
             {
-                num = Integer.parseInt(temp[0]);
-                ControlInput(num);
+                num = Integer.parseInt(temp[0]);//Parse data and store as an int value
+                ControlInput(num);//pass to control method
             }
             catch(NumberFormatException e)
             {
                 Toast.makeText(GameActivity.this, "Could not parse " + e, Toast.LENGTH_SHORT).show();
             }
 
-            direction.setLength(0);
-
-            // SEND SCORE TO ARDUINO
-
-
+            direction.setLength(0);//reset the direction value
         }
     };
 
-    public void sendScore(){
-
-        //Break BT connection
-//        String scoreString = Integer.toString(score);
-//        byte[] bytes = scoreString.getBytes(Charset.defaultCharset());
-//        mBluetoothConnection.write(bytes);
-
+    //Return to previous activity with game score value
+    public void sendScore()
+    {
         Intent goBack = new Intent (GameActivity.this, MainActivity.class);
         String scoreString = Integer.toString(score);
         goBack.putExtra("SCORE", scoreString);
@@ -154,19 +136,26 @@ public class GameActivity extends Activity {
 
     }
 
+    //Keypad control method - Written By Joel Degner-Budd 40430615
     private void ControlInput(int i)
     {
+        //if the key pressed is equal to the value 3
         if(i == 3)
         {
+            //increment direction of travel i.e. turn right
             directionOfTravel++;
+            //direction of travel cannot exceed 4 and is reset to 0
             if(directionOfTravel == 4)
             {
                 directionOfTravel = 0;
             }
         }
+        //if the key pressed is equal to the value 1
         else if(i == 1)
         {
+            //increment direction of travel i.e. turn left
             directionOfTravel--;
+            //direction of travel cannot exceed -1 and is reset to 3
             if(directionOfTravel == -1)
             {
                 directionOfTravel = 3;
@@ -174,85 +163,91 @@ public class GameActivity extends Activity {
         }
     }
 
-    class SnakeView extends SurfaceView implements Runnable {
-        Thread ourThread = null;
-        SurfaceHolder ourHolder;
-        volatile boolean playingSnake;
-        Paint paint;
+    class SnakeView extends SurfaceView implements Runnable
+    {
+        Thread gameThread = null; //start new game thread
+        SurfaceHolder gameHolder; //create new game holder
+        volatile boolean playingSnake; //playing snake game boolean
+        Paint paint; //new paint object for drawing canvas
 
-        public SnakeView(Context context) {
+        public SnakeView(Context context)
+        {
             super(context);
-            ourHolder = getHolder();
+            gameHolder = getHolder();
             paint = new Paint();
 
-            //Even my 9 year old play tester couldn't
-            //get a snake this long
+            //Maximum possible snake length 200
             snakeX = new int[200];
             snakeY = new int[200];
 
-            //our starting snake
+            //Get new starting Snake object
             getSnake();
-            //get an apple to munch
+            //Get new starting apple object
             getApple();
         }
 
-        public void getSnake() {
+        public void getSnake()
+        {
+            //Initial starting length of snake
             snakeLength = 3;
-            //start snake head in the middle of screen
-            snakeX[0] = numBlocksWide / 2;
-            snakeY[0] = numBlocksHigh / 2;
+            //Start snake head in the middle of screen
+            snakeX[0] = numBlocksWidth / 2;
+            snakeY[0] = numBlocksHeight / 2;
 
-            //Then the body
+            //Followed by placing the body
             snakeX[1] = snakeX[0] - 1;
             snakeY[1] = snakeY[0];
 
-            //And the tail
+            //And then finally placing the tail
             snakeX[1] = snakeX[1] - 1;
             snakeY[1] = snakeY[0];
         }
 
-        public void getApple() {
+        //create new apple object and randomly place it on the game grid
+        public void getApple()
+        {
             Random random = new Random();
-            appleX = random.nextInt(numBlocksWide - 1) + 1;
-            appleY = random.nextInt(numBlocksHigh - 1) + 1;
+            appleX = random.nextInt(numBlocksWidth - 1) + 1;
+            appleY = random.nextInt(numBlocksHeight - 1) + 1;
         }
 
         @Override
-        public void run() {
-            while (playingSnake) {
+        public void run()
+        {
+            while (playingSnake)
+            {
                 updateGame();
                 drawGame();
                 controlFPS();
-
             }
 
         }
 
-        public void updateGame() {
-
-            //Did the player get the apple
-            if (snakeX[0] == appleX && snakeY[0] == appleY) {
-                //grow the snake
+        public void updateGame()
+        {
+            //If the player gets the apple object
+            if (snakeX[0] == appleX && snakeY[0] == appleY)
+            {
+                //Increase Snake length
                 snakeLength++;
-                //replace the apple
+                //Get new apple object
                 getApple();
-                //add to the score
+                //Add to the score
                 score = score + snakeLength;
-                soundPool.play(sample1, 1, 1, 0, 0, 1);
                 Log.d(TAG, "Score: " + score);
-                //sendScore();
-
-
             }
 
             //move the body - starting at the back
-            for (int i = snakeLength; i > 0; i--) {
+            //moves snake related objects across the axial grid
+            for (int i = snakeLength; i > 0; i--)
+            {
                 snakeX[i] = snakeX[i - 1];
                 snakeY[i] = snakeY[i - 1];
             }
 
             //Move the head in the appropriate direction
-            switch (directionOfTravel) {
+            switch (directionOfTravel)
+            {
                 case 0://up
                     snakeY[0]--;
                     break;
@@ -270,43 +265,38 @@ public class GameActivity extends Activity {
                     break;
             }
 
-            //Have we had an accident
+            //If border collision occurs
             boolean dead = false;
-            //with a wall
             if (snakeX[0] == -1) dead = true;
-            if (snakeX[0] >= numBlocksWide) dead = true;
+            if (snakeX[0] >= numBlocksWidth) dead = true;
             if (snakeY[0] == -1) dead = true;
-            if (snakeY[0] == numBlocksHigh) dead = true;
-            //or eaten ourselves?
-            for (int i = snakeLength - 1; i > 0; i--) {
-                if ((i > 4) && (snakeX[0] == snakeX[i]) && (snakeY[0] == snakeY[i])) {
+            if (snakeY[0] == numBlocksHeight) dead = true;
+
+            //If a body collision occurs
+            for (int i = snakeLength - 1; i > 0; i--)
+            {
+                if ((i > 4) && (snakeX[0] == snakeX[i]) && (snakeY[0] == snakeY[i]))
+                {
                     dead = true;
                 }
             }
 
-
-            if (dead) {
-                //start again
-//                soundPool.play(sample4, 1, 1, 0, 0, 1);
-//                score = 0;
-//                getSnake();
-
+            //if dead end game and send score
+            if (dead)
+            {
                 //Go to main activity and send the high score to arduino
                 //if dead close socket
                 sendScore();
-               // Intent goBack = new Intent (GameActivity.this, MainActivity.class);
-               // startActivity(goBack);
-
-
             }
 
         }
 
-        public void drawGame() {
+        public void drawGame()
+        {
 
-            if (ourHolder.getSurface().isValid()) {
-                canvas = ourHolder.lockCanvas();
-                //Paint paint = new Paint();
+            if (gameHolder.getSurface().isValid())
+            {
+                canvas = gameHolder.lockCanvas();
                 canvas.drawColor(Color.WHITE);//the background
                 paint.setColor(Color.argb(255, 255, 255, 255));
                 paint.setTextSize(topGap / 2);
@@ -315,9 +305,9 @@ public class GameActivity extends Activity {
                 //draw a border - 4 lines, top right, bottom , left
                 paint.setStrokeWidth(3);//4 pixel border
                 canvas.drawLine(1, topGap, screenWidth - 1, topGap, paint);
-                canvas.drawLine(screenWidth - 1, topGap, screenWidth - 1, topGap + (numBlocksHigh * blockSize), paint);
-                canvas.drawLine(screenWidth - 1, topGap + (numBlocksHigh * blockSize), 1, topGap + (numBlocksHigh * blockSize), paint);
-                canvas.drawLine(1, topGap, 1, topGap + (numBlocksHigh * blockSize), paint);
+                canvas.drawLine(screenWidth - 1, topGap, screenWidth - 1, topGap + (numBlocksHeight * blockSize), paint);
+                canvas.drawLine(screenWidth - 1, topGap + (numBlocksHeight * blockSize), 1, topGap + (numBlocksHeight * blockSize), paint);
+                canvas.drawLine(1, topGap, 1, topGap + (numBlocksHeight * blockSize), paint);
 
                 //Draw the snake
                 canvas.drawBitmap(headBitmap, snakeX[0] * blockSize, (snakeY[0] * blockSize) + topGap, paint);
@@ -325,115 +315,99 @@ public class GameActivity extends Activity {
                 for (int i = 1; i < snakeLength - 1; i++) {
                     canvas.drawBitmap(bodyBitmap, snakeX[i] * blockSize, (snakeY[i] * blockSize) + topGap, paint);
                 }
-                //draw the tail
+                //Draw the tail
                 canvas.drawBitmap(tailBitmap, snakeX[snakeLength - 1] * blockSize, (snakeY[snakeLength - 1] * blockSize) + topGap, paint);
 
-                //draw the apple
+                //Draw the apple
                 canvas.drawBitmap(appleBitmap, appleX * blockSize, (appleY * blockSize) + topGap, paint);
 
-                ourHolder.unlockCanvasAndPost(canvas);
+                gameHolder.unlockCanvasAndPost(canvas);
             }
 
         }
 
-        public void controlFPS() {
+        public void controlFPS()
+        {
             long timeThisFrame = (System.currentTimeMillis() - lastFrameTime);
             long timeToSleep = 100 - timeThisFrame;
-            if (timeThisFrame > 0) {
+            if (timeThisFrame > 0)
+            {
                 fps = (int) (1000 / timeThisFrame);
             }
-            if (timeToSleep > 0) {
+            if (timeToSleep > 0)
+            {
 
-                try {
-                    ourThread.sleep(timeToSleep);
-                } catch (InterruptedException e) {
+                try
+                {
+                    gameThread.sleep(timeToSleep);
+                }
+                catch (InterruptedException e)
+                {
                     //Print an error message to the console
-                    Log.e("error", "failed to load sound files");
+                    Log.e("error", "failed to load");
                 }
 
             }
-
             lastFrameTime = System.currentTimeMillis();
         }
 
 
-        public void pause() {
+        public void pause()
+        {
             playingSnake = false;
-            try {
-                ourThread.join();
-            } catch (InterruptedException e) {
+            try
+            {
+                gameThread.join();
+            }
+            catch (InterruptedException e)
+            {
+                Log.e("error", "failed to load");
             }
 
         }
 
-        public void resume() {
+        public void resume()
+        {
             playingSnake = true;
-            ourThread = new Thread(this);
-            ourThread.start();
-        }
-
-        //Needs editing to support arduino controller
-        @Override
-        public boolean onTouchEvent(MotionEvent motionEvent) {
-
-            switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_UP:
-                    //if the motion event getX is greater than or equal to the screenWidth
-                    //divided by 2 a.k.a positive x axis
-                    if (motionEvent.getX() >= screenWidth / 2) {
-                        //turn right
-                        directionOfTravel++;
-                        //ensures value movement boundary cannot be greater than 4
-                        if (directionOfTravel == 4) {//no such direction
-                            //loop back to 0(up)
-                            directionOfTravel = 0;
-                        }
-                    }
-                    //else it is a negative x axis value turn left
-                    else {
-                        //turn left
-                        directionOfTravel--;
-                        //ensures value movement boundary cannot be less than 0
-                        if (directionOfTravel == -1) {//no such direction
-                            //loop back to 0(up)
-                            directionOfTravel = 3;
-                        }
-                    }
-            }
-            return true;
+            gameThread = new Thread(this);
+            gameThread.start();
         }
     }
 
+    //Edits made by Anna Dawidowska and Joel Degner-Budd
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
 
-        while (true) {
+        while (true)
+        {
             snakeView.pause();
             break;
         }
-
         finish();
     }
 
-
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         snakeView.resume();
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
         snakeView.pause();
     }
 
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-
+    //Edits made by Anna Dawidowska and Joel Degner-Budd
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_BACK)
+        {
             snakeView.pause();
-
 
             Intent i = new Intent(this, MainActivity.class);
             startActivity(i);
@@ -443,36 +417,9 @@ public class GameActivity extends Activity {
         return false;
     }
 
-    public void loadSound() {
-        soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
-        try {
-            //Create objects of the 2 required classes
-            AssetManager assetManager = getAssets();
-            AssetFileDescriptor descriptor;
-
-            //create our three fx in memory ready for use
-            descriptor = assetManager.openFd("sample1.ogg");
-            sample1 = soundPool.load(descriptor, 0);
-
-            descriptor = assetManager.openFd("sample2.ogg");
-            sample2 = soundPool.load(descriptor, 0);
-
-
-            descriptor = assetManager.openFd("sample3.ogg");
-            sample3 = soundPool.load(descriptor, 0);
-
-            descriptor = assetManager.openFd("sample4.ogg");
-            sample4 = soundPool.load(descriptor, 0);
-
-
-        } catch (IOException e) {
-            //Print an error message to the console
-            Log.e("error", "failed to load sound files");
-
-        }
-    }
-
-    public void configureDisplay() {
+    //Edits made by Anna Dawidowska and Joel Degner-Budd
+    public void configureDisplay()
+    {
         //find out the width and height of the screen
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -486,8 +433,8 @@ public class GameActivity extends Activity {
 
         //Determine how many game blocks will fit into the height and width
         //Leave one block for the score at the top
-        numBlocksWide = 40;
-        numBlocksHigh = ((screenHeight - topGap)) / blockSize;
+        numBlocksWidth = 40;
+        numBlocksHeight = ((screenHeight - topGap)) / blockSize;
 
         //Load and scale bitmaps
         headBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.head2);
@@ -500,6 +447,5 @@ public class GameActivity extends Activity {
         bodyBitmap = Bitmap.createScaledBitmap(bodyBitmap, blockSize, blockSize, false);
         tailBitmap = Bitmap.createScaledBitmap(tailBitmap, blockSize, blockSize, false);
         appleBitmap = Bitmap.createScaledBitmap(appleBitmap, blockSize, blockSize, false);
-
     }
 }
